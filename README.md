@@ -3,7 +3,7 @@ A simple assembler. Produces a custom linkable format (see ZLink for the linker)
 
 ## Basic usage
 
-    zlink --output my_program.obj my_program.asm
+    zasm --output my_program.obj my_program.asm
     
     This assumes `my_program.asm` contains the assembler source code and (if it assembles successfully) a linkable binary object will be created in `my_program.obj`.
     
