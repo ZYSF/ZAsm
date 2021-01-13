@@ -46,7 +46,7 @@ The parser (which handles the syntax) and the data level (which handles data dec
 
 For the [gen1cpu](https://github.com/ZYSF/gen1cpu/) instruction set, the specific instructions are internally just translated to `data32` lines. For example, the instruction `add $r0, $r5, $r1` is internally translated to something like:
 
-    data32 ((((0xA1 << 24) || (0 << 16)) || (5 << 8)) || 1) ; (0xA1 being the "add" opcode)
+    data32 ((((0xA1 << 24) | (0 << 16)) | (5 << 8)) | 1) ; (0xA1 being the "add" opcode)
 
 Of course that example could be computed by the assembler if it really wanted to, but this process is handled systematically and instructions which reference addresses within the program are also constructed the same way.
 
@@ -57,6 +57,16 @@ This means that the linker doesn't need to know about the instruction encoding, 
 This would reserve space for a 32-bit value, but it would expect your linker to make sense of the "SPECIAL_LINKER_LOOKUP" operator (whatever that means to some special linker).
 
 This design allows the assembler to be incorporated into more diverse targets and workflows (e.g. you can strip it down to just the data layer if you like, or use it with the linker to link together data-only binary files).
+
+An important thing to note is that each operation must follow the exact format `(left-hand-side operator right-hand-side)`, that is it must always include brackets and can never assume the left or right hand side is implied (so e.g. to pass a unary minus or `not` operation to the linker you'd have to use something like zero as a dummy left-hand side). This ensures that there are no ambiguities in the syntax. For example, if you just did:
+
+    data32 +
+
+Or:
+
+    data32 SPECIAL_LINKER_LOOKUP
+
+Then `+` or `SPECIAL_LINKER_LOOKUP` would still be scanned the same but wouldn't be treated as an operator (it'd just be a name, like `data32 plus`).
 
 ## TODO
 
