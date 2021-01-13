@@ -159,7 +159,7 @@ Examples:
     ; This would just execute a (likely bogus) system call:
     ; First load "1234" into $r0 (let's assume that's our system call number):
     xor $r0, $r0, $r0    ; This will make sure the register is reset to zero
-    addimm $r0, 1234     ; Then we can just assign it by adding an immediate value
+    addimm $r0, $r0, 1234     ; Then we can just assign it by adding an immediate value
     ; Since "syscall" bits are currently reserved, the assembler assumes them to be zero and doesn't take parameters for this:
     syscall
 
