@@ -21,7 +21,10 @@
     <ClInclude Include="asmdata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="asmgen.h">
+    <ClInclude Include="asmgen1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="asmgeneric_old.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -35,5 +38,16 @@
     <ClCompile Include="asmln.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="asmgeneric_old.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="asmgen1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Test.txt">
+      <Filter>Source Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>

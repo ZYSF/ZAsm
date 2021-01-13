@@ -1,6 +1,9 @@
 #ifndef ASMGEN_H
 #define ASMGEN_H
 
+#include "asmln.h"
+#include "asmdata.h"
+
 /* Definitions of "generic" instruction set as simple NULL-terminated lists of strings.*/
 
 #define ASMGEN_REGNAMES \
@@ -82,6 +85,8 @@
 	"jumpr",\
 	"jumpc",\
 	NULL
+
+bool asmgeneric_asmln(asmdata_t* asmdata, asmln_t* asmln);
 
 /* From ifndef at top of file: */
 #endif

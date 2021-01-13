@@ -1,0 +1,7 @@
+bait
+syscall
+
+x:
+addimm $r0, $r0, 100
+addimm $r0, $r0, (x + (100 | -30))
+add $r0, $r1, $rstack

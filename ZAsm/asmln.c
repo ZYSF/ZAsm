@@ -61,7 +61,7 @@ static bool asmlnx_parse_subexpression(asmln_t* asmln, asmt_t* asmt, int32_t* ty
 	bool mayhavemoreparams = true;
 	int32_t tt = asmt_tokentype(asmt);
 	int32_t subc = 0;
-	fprintf(stderr, "Got token type #%d\n", tt);
+	//fprintf(stderr, "Got token type #%d\n", tt);
 	switch (tt)
 	{
 	case ASMT_TOKENTYPE_OPENBR:
@@ -83,7 +83,7 @@ static bool asmlnx_parse_subexpression(asmln_t* asmln, asmt_t* asmt, int32_t* ty
 			return false;
 		}
 		x_var[0]->opcopy = asmln_tokendup_(asmt);
-		fprintf(stderr, "GOT OPERATOR '%s'\n", x_var[0]->opcopy);
+		//fprintf(stderr, "GOT OPERATOR '%s'\n", x_var[0]->opcopy);
 		asmt_skiptoken(asmt);
 		if (asmlnx_parse_subexpression(asmln, asmt, &(x_var[0]->rhstype), &(x_var[0]->rhscopy), &(x_var[0]->rhsx), &subc)) {
 			fprintf(stderr, "BAD RHS\n");

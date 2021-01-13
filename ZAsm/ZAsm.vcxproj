@@ -139,13 +139,19 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="asmdata.h" />
-    <ClInclude Include="asmgen.h" />
+    <ClInclude Include="asmgeneric_old.h" />
+    <ClInclude Include="asmgen1.h" />
     <ClInclude Include="asmln.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="asmdata.c" />
+    <ClCompile Include="asmgen1.c" />
+    <ClCompile Include="asmgeneric_old.c" />
     <ClCompile Include="asmln.c" />
     <ClCompile Include="main.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="Test.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
