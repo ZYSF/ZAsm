@@ -1,5 +1,5 @@
 # ZAsm
-A simple assembler. Produces a custom linkable format (see ZLink for the linker). Can be used for different instruction sets but includes a layer targetting my "gen1cpu" project.
+A simple assembler. Produces a custom linkable format (see ZLink for the linker). Can be used for different instruction sets but includes a layer targeting my "gen1cpu" project.
 
 ## Basic usage
 
