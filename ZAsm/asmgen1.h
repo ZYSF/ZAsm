@@ -4,6 +4,20 @@
 #include "asmln.h"
 #include "asmdata.h"
 
+/* NOTE: This list may include some planned-but-not-implemented instructions (see the CPU docs for more information).
+ * In particular (at time of writing) I've added "h" (as in high-half) versions of the memory and I/O operations before
+ * adding them to the CPU implementation.
+ 
+ * As for the syscall and trap instructions, these aren't really intended to be implemented, they're just reserved as
+ * "invalid instructions" which intentionally trigger an exception. This is why the assembler doesn't specify an encoding
+ * for the parameters; they might be meaningful to an operating system, might just be some reference data the debugger
+ * has inserted, or might just be left blank anyway (in any case except "blank", the assembler doesn't know how you want
+ * any parameters you might add encoded, but you can do it manually with data instructions anyway). For implementing
+ * system calls, it would probably make more sense to pass the system call number as a normal argument (like in a function
+ * call), since this would make for faster/simpler lookup in the kernel and more convenient access from C applications, so
+ * the blank option is expected to suffice at least for basic usage.
+ */
+
 #define ASMGEN1_INSTR_INFO \
 	"00", "xxx", "syscall",\
 	"11", "abi", "addimm",\
@@ -24,12 +38,21 @@
 	"CB", "bci", "ctrlout64",\
 	"D2", "abi", "read32",\
 	"DA", "bci", "write32",\
+	"D6", "abi", "read32h",\
+	"DE", "bci", "write32h",\
 	"E2", "abi", "in32",\
 	"EA", "bci", "out32",\
-	"FA", "bci", "ifabove",\
-	"FB", "bci", "ifbelows",\
-	"FE", "bci", "ifequals",\
+	"E6", "abi", "in32h",\
+	"EE", "bci", "out32h",\
+	"FA", "bca", "ifabove",\
+	"FB", "bca", "ifbelows",\
+	"FE", "bca", "ifequals",\
 	NULL, NULL, NULL
+
+/* NOTE: The CTRL_ and EXCN_ constants aren't supported yet. I'm still not sure if it really makes sense to have them
+ * in the assembler (since, generally speaking, these would probably be reimplemented as constants in C code anyway,
+ * and additional ones could be added by implementations), but it can't hurt to leave the definitions here as a reference.
+ */
 
 #define ASMGEN1_CTRL_INFO \
 	"$$CTRL_0", "$$CTRL_CPUID",\

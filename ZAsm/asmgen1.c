@@ -170,12 +170,12 @@ asmlnx_t* asmgen1_orx(int32_t lhstype, const char* lhsstr, asmlnx_t* lhsx, int32
 }
 */
 
-asmlnx_t* asmgen1_innerparam(int32_t lhstype, const char* lhsstr, asmlnx_t* lhsx, int32_t rhstype, const char* rhsstr, asmlnx_t* rhsx, const char* shiftstr, const char* maskstr) {
+asmlnx_t* asmgen1_innerparam(int32_t lhstype, const char* lhsstr, asmlnx_t* lhsx, int32_t rhstype, const char* rhsstr, asmlnx_t* rhsx, bool negshift, const char* shiftstr, const char* maskstr) {
 	asmlnx_t* innerMask = asmgen1_copyopx(rhstype, rhsstr, rhsx, "&", ASMT_TOKENTYPE_NUMBER, maskstr, NULL);
 	if (innerMask == NULL) {
 		return NULL;
 	}
-	asmlnx_t* innerShift = asmgen1_copyopx(ASMT_TOKENTYPE_OPENBR, strdup("(...)"), innerMask, "<<", ASMT_TOKENTYPE_NUMBER, shiftstr, NULL);
+	asmlnx_t* innerShift = asmgen1_copyopx(ASMT_TOKENTYPE_OPENBR, strdup("(...)"), innerMask, negshift ? ">>" : "<<", ASMT_TOKENTYPE_NUMBER, shiftstr, NULL);
 	
 	return asmgen1_copyopx(lhstype, lhsstr, lhsx, "|", ASMT_TOKENTYPE_OPENBR, strdup("(...)"), innerShift);
 }
@@ -185,7 +185,8 @@ bool asmgen1_xparam(asmln_t* asmln, int32_t type, const char* str, asmlnx_t* x, 
 	if (shiftbuffer == NULL) {
 		return false;
 	}
-	const char* shiftstr = ltoa(shift, shiftbuffer, 10);
+	bool negshift = shift < 0;
+	const char* shiftstr = ltoa(negshift ? 0 - shift : shift, shiftbuffer, 10);
 	void* maskbuffer = calloc(100, 1);
 	if (maskbuffer == NULL) {
 		return false;
@@ -209,7 +210,7 @@ bool asmgen1_xparam(asmln_t* asmln, int32_t type, const char* str, asmlnx_t* x, 
 		}
 		const char* regstr = ltoa(n, regbuffer, 10);
 		//printf("Building inner...\n");
-		asmln->paramx[0] = asmgen1_innerparam(asmln->paramtype[0], asmln->paramcopy[0], asmln->paramx[0], ASMT_TOKENTYPE_NUMBER, regstr, NULL, shiftstr, maskstr);
+		asmln->paramx[0] = asmgen1_innerparam(asmln->paramtype[0], asmln->paramcopy[0], asmln->paramx[0], ASMT_TOKENTYPE_NUMBER, regstr, NULL, negshift, shiftstr, maskstr);
 		asmln->paramcopy[0] = strdup("(...)");
 		asmln->paramtype[0] = ASMT_TOKENTYPE_OPENBR;
 		if (asmln->paramx[0] != NULL) {
@@ -217,7 +218,7 @@ bool asmgen1_xparam(asmln_t* asmln, int32_t type, const char* str, asmlnx_t* x, 
 		}
 	} else {
 		//printf("Building inner (non-register)...\n");
-		asmln->paramx[0] = asmgen1_innerparam(asmln->paramtype[0], asmln->paramcopy[0], asmln->paramx[0], type, strdup(str), asmgen1_copyx(x), shiftstr, maskstr);
+		asmln->paramx[0] = asmgen1_innerparam(asmln->paramtype[0], asmln->paramcopy[0], asmln->paramx[0], type, strdup(str), asmgen1_copyx(x), negshift, shiftstr, maskstr);
 		asmln->paramcopy[0] = strdup("(...)");
 		asmln->paramtype[0] = ASMT_TOKENTYPE_OPENBR;
 		if (asmln->paramx[0] != NULL) {
@@ -226,9 +227,10 @@ bool asmgen1_xparam(asmln_t* asmln, int32_t type, const char* str, asmlnx_t* x, 
 	}
 }
 
-bool asmgen1_asmln_internal_abc(asmdata_t* asmdata, asmln_t* asmln, int32_t instrbase) {
+bool asmgen1_asmln_internal_abc(asmdata_t* asmdata, asmln_t* asmln, int32_t instrbase, bool hasA, bool hasB, bool hasC) {
 	/* Check number of parameters first, otherwise trying to decode them will probably cause problems. */
-	if (asmln->nparams != 3) {
+	int nparams = (hasA ? 1 : 0) + (hasB ? 1 : 0) + (hasC ? 1 : 0);
+	if (asmln->nparams != nparams) {
 		//printf("Bad params to ABC\n");
 		return false;
 	}
@@ -252,22 +254,33 @@ bool asmgen1_asmln_internal_abc(asmdata_t* asmdata, asmln_t* asmln, int32_t inst
 
 	//printf("Doing ABC...\n");
 
-	if (!asmgen1_xparam(&tmpln, asmln->paramtype[0], asmln->paramcopy[0], asmln->paramx[0], true, 16, 0xFF)) {
-		//printf("Failed at A\n");
-		free(buffer);
-		return false;
+	int pnum = 0;
+
+	if (hasA) {
+		if (!asmgen1_xparam(&tmpln, asmln->paramtype[pnum], asmln->paramcopy[pnum], asmln->paramx[pnum], true, 16, 0xFF)) {
+			//printf("Failed at A\n");
+			free(buffer);
+			return false;
+		}
+		pnum++;
 	}
 
-	if (!asmgen1_xparam(&tmpln, asmln->paramtype[1], asmln->paramcopy[1], asmln->paramx[1], true, 8, 0xFF)) {
-		//printf("Failed at B\n");
-		free(buffer);
-		return false;
+	if (hasB) {
+		if (!asmgen1_xparam(&tmpln, asmln->paramtype[pnum], asmln->paramcopy[pnum], asmln->paramx[pnum], true, 8, 0xFF)) {
+			//printf("Failed at B\n");
+			free(buffer);
+			return false;
+		}
+		pnum++;
 	}
 
-	if (!asmgen1_xparam(&tmpln, asmln->paramtype[2], asmln->paramcopy[2], asmln->paramx[2], true, 0, 0xFF)) {
-		//printf("Failed at C\n");
-		free(buffer);
-		return false;
+	if (hasC) {
+		if (!asmgen1_xparam(&tmpln, asmln->paramtype[pnum], asmln->paramcopy[pnum], asmln->paramx[pnum], true, 0, 0xFF)) {
+			//printf("Failed at C\n");
+			free(buffer);
+			return false;
+		}
+		pnum++; // We're at the end anyway, but just for good luck...
 	}
 
 	bool result = asmdata_asmln(asmdata, &tmpln);
@@ -336,8 +349,62 @@ bool asmgen1_asmln_internal_bci(asmdata_t* asmdata, asmln_t* asmln, int32_t inst
 	return asmgen1_asmln_internal_abi(asmdata, asmln, instrbase); // ABI and BCI are formatted the same (the registers just have different semantic meanings)
 }
 
+/* "bca" encoding is just the specialised form of abi/bci encoding, where the parameter (a code address) is encoded shifted two bits to the right. */
+bool asmgen1_asmln_internal_bca(asmdata_t* asmdata, asmln_t* asmln, int32_t instrbase) {
+	/* Check number of parameters first, otherwise trying to decode them will probably cause problems. */
+	if (asmln->nparams != 3) {
+		//printf("Bad params to ABI\n");
+		return false;
+	}
+
+	/* Begin constructing an asmdata instruction. This instruction will be a "data32" instruction with a
+	 * single parameter (an expression constructing the instruction).
+	 */
+	asmln_t tmpln;
+	tmpln.instrcopy = "data32";
+	tmpln.nparams = 1;
+	tmpln.commentcopy = tmpln.labelcopy = tmpln.errorcopy = NULL;
+	void* buffer = NULL;
+
+	/* Begin by setting the type to number*/
+	tmpln.paramtype[0] = ASMT_TOKENTYPE_NUMBER;
+	buffer = calloc(100, 1);
+	if (buffer == NULL) {
+		return false;
+	}
+	tmpln.paramcopy[0] = _ltoa(instrbase, buffer, 10);
+
+	//printf("Doing ABI...\n");
+
+	if (!asmgen1_xparam(&tmpln, asmln->paramtype[0], asmln->paramcopy[0], asmln->paramx[0], true, 20, 0xF)) {
+		//printf("Failed at A\n");
+		free(buffer);
+		return false;
+	}
+
+	if (!asmgen1_xparam(&tmpln, asmln->paramtype[1], asmln->paramcopy[1], asmln->paramx[1], true, 16, 0xF)) {
+		//printf("Failed at B\n");
+		free(buffer);
+		return false;
+	}
+
+	/* Encoding the address parameter just uses a negative shift value (which gets translated into a right shift in case the linker is fussy). */
+	if (!asmgen1_xparam(&tmpln, asmln->paramtype[2], asmln->paramcopy[2], asmln->paramx[2], false, -2, 0xFFFF)) {
+		//printf("Failed at I\n");
+		free(buffer);
+		return false;
+	}
+
+	bool result = asmdata_asmln(asmdata, &tmpln);
+
+	if (buffer != NULL) {
+		free(buffer);
+	}
+
+	return result;
+}
+
 bool asmgen1_asmln_internal(asmdata_t* asmdata, asmln_t* asmln, int32_t opbase) {
-	//printf("WTF?\n");
 	const char* codestr = gen1instrs[opbase * 3];
 	uint32_t code = strtol(codestr, NULL, 16) << 24;
 	const char* encstr = gen1instrs[opbase * 3 + 1];
@@ -346,11 +413,25 @@ bool asmgen1_asmln_internal(asmdata_t* asmdata, asmln_t* asmln, int32_t opbase) 
 
 	if (strcmp(encstr, "abi") == 0) {
 		return asmgen1_asmln_internal_abi(asmdata, asmln, code);
-	} else if(strcmp(encstr, "bci") == 0) {
+	} else if (strcmp(encstr, "bci") == 0) {
 		return asmgen1_asmln_internal_bci(asmdata, asmln, code);
-	} else if(strcmp(encstr, "abc") == 0) {
-		return asmgen1_asmln_internal_abc(asmdata, asmln, code);
-	} else if(strcmp(encstr, "xxx") == 0) {
+	} else if (strcmp(encstr, "bca") == 0) {
+		return asmgen1_asmln_internal_bca(asmdata, asmln, code);
+	}
+	else if (strcmp(encstr, "abc") == 0) {
+		return asmgen1_asmln_internal_abc(asmdata, asmln, code, true, true, true);
+	}
+	else if (strcmp(encstr, "axx") == 0) {
+		return asmgen1_asmln_internal_abc(asmdata, asmln, code, true, false, false);
+	}
+	else if (strcmp(encstr, "xxc") == 0) {
+		return asmgen1_asmln_internal_abc(asmdata, asmln, code, false, false, true);
+	}
+	else if (strcmp(encstr, "axc") == 0) {
+		return asmgen1_asmln_internal_abc(asmdata, asmln, code, true, false, true);
+	}
+	else if(strcmp(encstr, "xxx") == 0) {
+		// NOTE: This could really just be replaced with _abc() with each parameter option as false
 		return asmgen1_asmln_internal_xxx(asmdata, asmln, code);
 	} else {
 		//printf("NO MATCH?\n");

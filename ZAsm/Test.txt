@@ -1,7 +1,9 @@
-bait
-syscall
+bait ; This would just trigger an exception (but designed for debuggers)
+syscall ; This would also just trigger an exception (but designed for operating system calls)
 
-x:
+x: ; Defines a label (e.g. for the start of a function)
 addimm $r0, $r0, 100
 addimm $r0, $r0, (x + (100 | -30))
 add $r0, $r1, $rstack
+blink $r3 ; This would just save the next instruction pointer
+ifequals $r0, $r0, x ; This would just loop back to the "x" label ($r0 would always equal $r0)
