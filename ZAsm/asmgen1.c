@@ -292,7 +292,7 @@ bool asmgen1_asmln_internal_abc(asmdata_t* asmdata, asmln_t* asmln, int32_t inst
 	return result;
 }
 
-bool asmgen1_asmln_internal_abi(asmdata_t* asmdata, asmln_t* asmln, int32_t instrbase) {
+bool asmgen1_asmln_internal_abilike(asmdata_t* asmdata, asmln_t* asmln, int32_t instrbase, bool hasfirstreg, bool hassecondreg) {
 	/* Check number of parameters first, otherwise trying to decode them will probably cause problems. */
 	if (asmln->nparams != 3) {
 		//printf("Bad params to ABI\n");
@@ -318,19 +318,27 @@ bool asmgen1_asmln_internal_abi(asmdata_t* asmdata, asmln_t* asmln, int32_t inst
 
 	//printf("Doing ABI...\n");
 
-	if (!asmgen1_xparam(&tmpln, asmln->paramtype[0], asmln->paramcopy[0], asmln->paramx[0], true, 20, 0xF)) {
-		//printf("Failed at A\n");
-		free(buffer);
-		return false;
+	int pnum = 0;
+
+	if (hasfirstreg) {
+		if (!asmgen1_xparam(&tmpln, asmln->paramtype[pnum], asmln->paramcopy[pnum], asmln->paramx[pnum], true, 20, 0xF)) {
+			//printf("Failed at A\n");
+			free(buffer);
+			return false;
+		}
+		pnum++;
 	}
 
-	if (!asmgen1_xparam(&tmpln, asmln->paramtype[1], asmln->paramcopy[1], asmln->paramx[1], true, 16, 0xF)) {
-		//printf("Failed at B\n");
-		free(buffer);
-		return false;
+	if (hassecondreg) {
+		if (!asmgen1_xparam(&tmpln, asmln->paramtype[pnum], asmln->paramcopy[pnum], asmln->paramx[pnum], true, 16, 0xF)) {
+			//printf("Failed at B\n");
+			free(buffer);
+			return false;
+		}
+		pnum++;
 	}
 
-	if (!asmgen1_xparam(&tmpln, asmln->paramtype[2], asmln->paramcopy[2], asmln->paramx[2], false, 0, 0xFFFF)) {
+	if (!asmgen1_xparam(&tmpln, asmln->paramtype[pnum], asmln->paramcopy[pnum], asmln->paramx[pnum], false, 0, 0xFFFF)) {
 		//printf("Failed at I\n");
 		free(buffer);
 		return false;
@@ -343,10 +351,6 @@ bool asmgen1_asmln_internal_abi(asmdata_t* asmdata, asmln_t* asmln, int32_t inst
 	}
 
 	return result;
-}
-
-bool asmgen1_asmln_internal_bci(asmdata_t* asmdata, asmln_t* asmln, int32_t instrbase) {
-	return asmgen1_asmln_internal_abi(asmdata, asmln, instrbase); // ABI and BCI are formatted the same (the registers just have different semantic meanings)
 }
 
 /* "bca" encoding is just the specialised form of abi/bci encoding, where the parameter (a code address) is encoded shifted two bits to the right. */
@@ -412,10 +416,16 @@ bool asmgen1_asmln_internal(asmdata_t* asmdata, asmln_t* asmln, int32_t opbase) 
 	//printf("GOT CODESTR '%s' (0x%x) ENCSTR '%s'...\n", codestr, code, encstr);
 
 	if (strcmp(encstr, "abi") == 0) {
-		return asmgen1_asmln_internal_abi(asmdata, asmln, code);
+		return asmgen1_asmln_internal_abilike(asmdata, asmln, code, true, true);
 	} else if (strcmp(encstr, "bci") == 0) {
-		return asmgen1_asmln_internal_bci(asmdata, asmln, code);
-	} else if (strcmp(encstr, "bca") == 0) {
+		return asmgen1_asmln_internal_abilike(asmdata, asmln, code, true, true);
+	} else if (strcmp(encstr, "axi") == 0) {
+		return asmgen1_asmln_internal_abilike(asmdata, asmln, code, true, false);
+	}
+	else if (strcmp(encstr, "xci") == 0) {
+		return asmgen1_asmln_internal_abilike(asmdata, asmln, code, false, true);
+	}
+	else if (strcmp(encstr, "bca") == 0) {
 		return asmgen1_asmln_internal_bca(asmdata, asmln, code);
 	}
 	else if (strcmp(encstr, "abc") == 0) {

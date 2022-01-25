@@ -34,8 +34,8 @@
 	"B3", "axc", "be",\
 	"B4", "xxx", "before",\
 	"B8", "xxx", "bait",\
-	"C3", "abi", "ctrlin64",\
-	"CB", "bci", "ctrlout64",\
+	"C3", "axi", "ctrlin64",\
+	"CB", "xci", "ctrlout64",\
 	"D2", "abi", "read32",\
 	"DA", "bci", "write32",\
 	"D6", "abi", "read32h",\
@@ -63,12 +63,12 @@
 	"$$CTRL_5", "$$CTRL_MIRRORXADDR",\
 	"$$CTRL_6", "$$CTRL_TIMER0",\
 	"$$CTRL_7", "$$CTRL_TIMER1_RESERVED",\
-	"$$CTRL_8", "$$CTRL_SYSTEM0_RESERVED",\
-	"$$CTRL_9", "$$CTRL_SYSTEM1_RESERVED",\
-	"$$CTRL_A", "",\
-	"$$CTRL_B", "",\
-	"$$CTRL_C", "",\
-	"$$CTRL_D", "",\
+	"$$CTRL_8", "$$CTRL_SYSTEM0",\
+	"$$CTRL_9", "$$CTRL_SYSTEM1",\
+	"$$CTRL_A", "$$CTRL_GPIOA_PINS",\
+	"$$CTRL_B", "$$CTRL_GPIOA_INPUTMASK__OR_GPIOB__RESERVED",\
+	"$$CTRL_C", "$$CTRL_GPIOA_OUTPUTMASK__OR_GPIOC___RESERVED",\
+	"$$CTRL_D", "$$CTRL_GPIOA_MASKEDPINS___OR_GPIOD__RESERVER",\
 	"$$CTRL_E", "",\
 	"$$CTRL_F", "",\
 	NULL, NULL
