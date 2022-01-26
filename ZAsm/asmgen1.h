@@ -34,16 +34,28 @@
 	"B3", "axc", "be",\
 	"B4", "xxx", "before",\
 	"B8", "xxx", "bait",\
-	"C3", "axi", "ctrlin64",\
-	"CB", "xci", "ctrlout64",\
+	"C7", "axi", "ctrlin",\
+	"CF", "xci", "ctrlout",\
+	"C3", "axi", "gen1ctrlin64",\
+	"CB", "xci", "gen1ctrlout64",\
 	"D2", "abi", "read32",\
+	"D6", "abi", "read32x",\
+	"D7", "abi", "read32h",\
 	"DA", "bci", "write32",\
-	"D6", "abi", "read32h",\
-	"DE", "bci", "write32h",\
+	"DE", "bci", "write32hz",\
+	"DF", "bci", "write32hx",\
+	"D0", "abi", "read8",\
+	"D4", "abi", "read8x",\
+	"D1", "abi", "read16",\
+	"D5", "abi", "read16x",\
+	"D8", "bci", "write8",\
+	"D9", "bci", "write16",\
+	"D6", "abi", "gen1read32h",\
+	"DE", "bci", "gen1write32h",\
 	"E2", "abi", "in32",\
 	"EA", "bci", "out32",\
-	"E6", "abi", "in32h",\
-	"EE", "bci", "out32h",\
+	"E6", "abi", "gen1in32h",\
+	"EE", "bci", "gen1out32h",\
 	"FA", "bca", "ifabove",\
 	"FB", "bca", "ifbelows",\
 	"FE", "bca", "ifequals",\
