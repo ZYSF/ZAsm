@@ -39,9 +39,11 @@
 	"C3", "axi", "gen1ctrlin64",\
 	"CB", "xci", "gen1ctrlout64",\
 	"D2", "abi", "read32",\
+	"D3", "abi", "read64",\
 	"D6", "abi", "read32x",\
 	"D7", "abi", "read32h",\
 	"DA", "bci", "write32",\
+	"DB", "bci", "write64",\
 	"DE", "bci", "write32hz",\
 	"DF", "bci", "write32hx",\
 	"D0", "abi", "read8",\
